@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NONEX CORP! CODE CONVERTER</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #0d1b2a, #1b263b);
+      color: #00f7ff;
+      overflow: hidden;
+      position: relative;
+    }
+    #particles-js { position: fixed; width: 100%; height: 100%; z-index: 0; }
+    .card {
+      position: relative; z-index: 2; max-width: 800px; margin: 100px auto;
+      background: rgba(0, 10, 30, 0.7); border: 2px solid #00f7ff;
+      border-radius: 25px; padding: 30px; text-align: center;
+      box-shadow: 0 0 35px #00f7ff; backdrop-filter: blur(12px);
+    }
+    .card h1 { font-size: 32px; margin-bottom: 25px; text-shadow: 0 0 12px #00f7ff; }
+    .card input, .card select, .card button {
+      width: 100%; padding: 14px; border: 1px solid #00f7ff;
+      border-radius: 10px; background: #000; color: #00f7ff;
+      font-size: 16px; margin-bottom: 18px; box-shadow: 0 0 10px #00f7ff;
+    }
+    .card button {
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .card button:hover {
+      background: #00f7ff;
+      color: #000;
+      box-shadow: 0 0 20px #00f7ff;
+    }
+    .byte-count { font-size: 18px; margin-bottom: 20px; }
+    pre {
+      padding: 14px; border: 1px solid #00f7ff; border-radius: 10px;
+      background: #000; color: #00f7ff; font-size: 16px;
+      overflow-x: auto; white-space: pre-wrap; box-shadow: 0 0 12px #00f7ff;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 18px;
+      color: #00fff2;
+      text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #00ffff;
+      text-align: center;
+      font-family: Consolas, monospace;
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="particles-js"></div>
+
+  <div class="card">
+    <h1>Nonex AOB Converter (C# ⇆ C++ ⇆ Python)</h1>
+    <select id="mode">
+      <option value="auto">Auto Detect</option>
+      <option value="cs2cpp">C# ➝ C++</option>
+      <option value="cpp2cs">C++ ➝ C#</option>
+      <option value="cs2py">C# ➝ Python</option>
+      <option value="cpp2py">C++ ➝ Python</option>
+      <option value="py2cs">Python ➝ C#</option>
+      <option value="py2cpp">Python ➝ C++</option>
+    </select>
+    <input id="aobInput" type="text" placeholder="Paste AOB (C#, C++ or Python)" />
+    <div class="byte-count" id="byteCount">BYTE COUNT: 0</div>
+    <pre id="output" style="cursor:pointer; user-select:none;" title="Open Discord">
+  Converted Code Will Go Here
+</pre>
+
+<script>
+  document.getElementById('output').addEventListener('click', function () {
+    const url = 'https://discord.gg/Cr8g8f9g5B';
+    // নতুন ট্যাবে খুলবে এবং security-এর জন্য noopener/noreferrer ব্যবহার করা হলো
+    window.open(url, '_blank', 'noopener,noreferrer');
+  });
+</script>
+
+    <button id="copyBtn">Copy Output</button>
+  </div>
+
+  <div class="footer">Developing by Nonex </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script>
+    // Particles background
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 80 },
+        "color": { "value": "#00f7ff" },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.5 },
+        "size": { "value": 3 },
+        "line_linked": { "enable": true, "distance": 150, "color": "#00f7ff", "opacity": 0.4, "width": 1 },
+        "move": { "enable": true, "speed": 2 }
+      }
+    });
+
+    const aobInput = document.getElementById("aobInput");
+    const output = document.getElementById("output");
+    const byteCount = document.getElementById("byteCount");
+    const modeSelect = document.getElementById("mode");
+    const copyBtn = document.getElementById("copyBtn");
+
+    function convert() {
+      const text = aobInput.value.trim();
+      const mode = modeSelect.value;
+
+      if (!text) {
+        output.textContent = "Converted Code Will Go Here";
+        byteCount.textContent = "BYTE COUNT: 0";
+        return;
+      }
+
+      let parts;
+      let result = [];
+      let count = 0;
+      let direction = mode;
+
+      // Auto detect
+      if (mode === "auto") {
+        if (text.startsWith("b\"") || text.startsWith("b'")) {
+          direction = "py2cs"; // python byte string
+        } else if (text.includes("0x")) {
+          direction = "cpp2cs"; // contains hex prefix
+        } else {
+          direction = "cs2cpp"; // default plain hex
+        }
+      }
+
+      // --- C++ ➝ C# ---
+      if (direction === "cpp2cs") {
+        parts = text.split(/,\s*/);
+        for (let part of parts) {
+          if (/^0x[0-9A-Fa-f]{2}$/.test(part)) {
+            result.push(part.substring(2).toUpperCase());
+            count++;
+          }
+        }
+        output.textContent = result.join(" ");
+      }
+
+      // --- C# ➝ C++ ---
+      else if (direction === "cs2cpp") {
+        parts = text.split(/\s+/);
+        for (let part of parts) {
+          if (/^[A-Fa-f0-9]{2}$/.test(part)) {
+            result.push("0x" + part.toUpperCase());
+            count++;
+          }
+        }
+        output.textContent = result.join(", ");
+      }
+
+      // --- C# ➝ Python ---
+      else if (direction === "cs2py") {
+        parts = text.split(/\s+/);
+        for (let part of parts) {
+          if (/^[A-Fa-f0-9]{2}$/.test(part)) {
+            result.push("\\x" + part.toUpperCase());
+            count++;
+          }
+        }
+        output.textContent = '' + result.join("") + '"';
+      }
+
+      // --- C++ ➝ Python ---
+      else if (direction === "cpp2py") {
+        parts = text.split(/,\s*/);
+        for (let part of parts) {
+          if (/^0x[0-9A-Fa-f]{2}$/.test(part)) {
+            result.push("\\x" + part.substring(2).toUpperCase());
+            count++;
+          }
+        }
+        output.textContent = '' + result.join("") + '"';
+      }
+
+      // --- Python ➝ C# ---
+      else if (direction === "py2cs") {
+        parts = text.replace(/^b["']|["']$/g, "").split(/\\x/).filter(Boolean);
+        for (let part of parts) {
+          if (/^[A-Fa-f0-9]{2}$/.test(part)) {
+            result.push(part.toUpperCase());
+            count++;
+          }
+        }
+        output.textContent = result.join(" ");
+      }
+
+      // --- Python ➝ C++ ---
+      else if (direction === "py2cpp") {
+        parts = text.replace(/^b["']|["']$/g, "").split(/\\x/).filter(Boolean);
+        for (let part of parts) {
+          if (/^[A-Fa-f0-9]{2}$/.test(part)) {
+            result.push("0x" + part.toUpperCase());
+            count++;
+          }
+        }
+        output.textContent = result.join(", ");
+      }
+
+      byteCount.textContent = `BYTE COUNT: ${count}`;
+    }
+
+    // Copy output
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(output.textContent).then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy Output", 1500);
+      });
+    });
+
+    aobInput.addEventListener("input", convert);
+    modeSelect.addEventListener("change", convert);
+  </script>
+</body>
+</html>
