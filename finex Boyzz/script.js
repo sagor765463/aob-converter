@@ -147,137 +147,141 @@ if (document.readyState === 'loading') {
   new AestheticDataRain();
 }
 
-// 2. Custom Cursor System (Tenzo Difference Blend)
-const cursor = document.getElementById('cur');
+window.addEventListener('DOMContentLoaded', () => {
+  // 2. Custom Cursor System (Tenzo Difference Blend)
+  const cursor = document.getElementById('cur');
 
-window.addEventListener('mousemove', (e) => {
-    if (cursor) {
-        cursor.style.left = `${e.clientX}px`;
-        cursor.style.top = `${e.clientY}px`;
-    }
-    
-    // Check if hovering an interactive target
-    const target = e.target;
-    const isHovering = target && target.closest && (
-                       target.closest('.magic-hover') !== null ||
-                       target.closest('a') !== null ||
-                       target.closest('button') !== null ||
-                       target.closest('.pill') !== null ||
-                       target.closest('.ac') !== null ||
-                       target.closest('.mts-cell') !== null
-                     );
+  window.addEventListener('mousemove', (e) => {
+      if (cursor) {
+          cursor.style.left = `${e.clientX}px`;
+          cursor.style.top = `${e.clientY}px`;
+      }
+      
+      // Check if hovering an interactive target
+      const target = e.target;
+      const isHovering = target && target.closest && (
+                         target.closest('.magic-hover') !== null ||
+                         target.closest('a') !== null ||
+                         target.closest('button') !== null ||
+                         target.closest('.pill') !== null ||
+                         target.closest('.ac') !== null ||
+                         target.closest('.mts-cell') !== null
+                       );
                        
-    if (isHovering) {
-        if (cursor) cursor.classList.add('big');
-    } else {
-        if (cursor) cursor.classList.remove('big');
-    }
-});
-
-// 2b. Magnetic Hover Physics!
-// When hovering over .magic-hover, elements slightly pull towards the mouse.
-document.querySelectorAll('.magic-hover, .pill, .ac, .cw-item, .game-item, .mts-cell, .mal-btn').forEach(el => {
-  el.addEventListener('mousemove', (e) => {
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    // Tweak the multiplier (0.15) to control how magnetic it is
-    el.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+      if (isHovering) {
+          if (cursor) cursor.classList.add('big');
+      } else {
+          if (cursor) cursor.classList.remove('big');
+      }
   });
-  
-  el.addEventListener('mouseleave', () => {
-    // Reset transform on leave with CSS transition taking over
-    el.style.transform = 'translate(0px, 0px)';
-  });
-});
 
-// 3. Scroll Reveal Observer (Buttery smooth cubic-bezier fades)
-const fadeElements = document.querySelectorAll('.fade-up');
-const observerOptions = {
-    threshold: 0.15,
-    rootMargin: "0px 0px -50px 0px"
-};
-
-const fadeObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-        }
+  // 2b. Magnetic Hover Physics!
+  // When hovering over .magic-hover, elements slightly pull towards the mouse.
+  document.querySelectorAll('.magic-hover, .pill, .ac, .cw-item, .game-item, .mts-cell, .mal-btn').forEach(el => {
+    el.addEventListener('mousemove', (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      // Tweak the multiplier (0.15) to control how magnetic it is
+      el.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
     });
-}, observerOptions);
-fadeElements.forEach(el => fadeObserver.observe(el));
-
-// 4. Equalizer BGM Player Setup with Autoplay Logic
-const bgmToggle = document.getElementById('bgm-toggle');
-const bgmAudio = document.getElementById('bgm-audio');
-const bgmStatusText = document.getElementById('bgm-status-text');
-const bgmIcon = document.getElementById('bgm-icon');
-const visualizerBars = document.getElementById('bgm-visualizer');
-
-let isPlaying = false;
-
-const mpContainer = document.getElementById('music-player');
-
-function updateUI(playing) {
-    if (playing) {
-        bgmStatusText.textContent = 'BGM PLAYING';
-        bgmIcon.textContent = '🔊';
-        visualizerBars.classList.add('playing');
-        mpContainer?.classList.add('is-playing');
-    } else {
-        bgmStatusText.textContent = 'BGM STOPPED';
-        bgmIcon.textContent = '🔇';
-        visualizerBars.classList.remove('playing');
-        mpContainer?.classList.remove('is-playing');
-    }
-}
-
-function toggleAudio() {
-    if (isPlaying) {
-        bgmAudio.pause();
-    } else {
-        bgmAudio.play().catch(e => console.error("Audio playback failed:", e));
-    }
-    isPlaying = !isPlaying;
-    updateUI(isPlaying);
-}
-
-if (bgmToggle && bgmAudio && visualizerBars) {
-    bgmToggle.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent trigger from global listeners
-        toggleAudio();
-    });
-
-    // Autoplay Logic: Attempt to play on first user interaction
-    const startOnInteraction = () => {
-        if (!isPlaying) {
-            bgmAudio.play().then(() => {
-                isPlaying = true;
-                updateUI(true);
-                // Remove listeners after successful autoplay
-                cleanupListeners();
-            }).catch(() => {
-                // Keep waiting for interaction if blocked
-            });
-        }
-    };
-
-    const cleanupListeners = () => {
-        window.removeEventListener('click', startOnInteraction);
-        window.removeEventListener('keydown', startOnInteraction);
-        window.removeEventListener('scroll', startOnInteraction);
-        window.removeEventListener('touchstart', startOnInteraction);
-    };
-
-    window.addEventListener('click', startOnInteraction);
-    window.addEventListener('keydown', startOnInteraction);
-    window.addEventListener('scroll', startOnInteraction);
-    window.addEventListener('touchstart', startOnInteraction);
     
-    // Also try immediately (for users who have already interacted/allowed)
-    startOnInteraction();
-}
+    el.addEventListener('mouseleave', () => {
+      // Reset transform on leave with CSS transition taking over
+      el.style.transform = 'translate(0px, 0px)';
+    });
+  });
+
+  // 3. Scroll Reveal Observer (Buttery smooth cubic-bezier fades)
+  const fadeElements = document.querySelectorAll('.fade-up');
+  const observerOptions = {
+      threshold: 0.15,
+      rootMargin: "0px 0px -50px 0px"
+  };
+
+  const fadeObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+          if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+          }
+      });
+  }, observerOptions);
+  fadeElements.forEach(el => fadeObserver.observe(el));
+
+  // 4. Equalizer BGM Player Setup with Autoplay Logic
+  const bgmToggle = document.getElementById('bgm-toggle');
+  const bgmAudio = document.getElementById('bgm-audio');
+  const bgmStatusText = document.getElementById('bgm-status-text');
+  const bgmIcon = document.getElementById('bgm-icon');
+  const visualizerBars = document.getElementById('bgm-visualizer');
+  const mpContainer = document.getElementById('music-player');
+  let isPlaying = false;
+
+  function updateUI(playing) {
+      if (playing) {
+          bgmStatusText.textContent = 'BGM PLAYING';
+          bgmIcon.textContent = '🔊';
+          visualizerBars.classList.add('playing');
+          mpContainer?.classList.add('is-playing');
+      } else {
+          bgmStatusText.textContent = 'BGM STOPPED';
+          bgmIcon.textContent = '🔇';
+          visualizerBars.classList.remove('playing');
+          mpContainer?.classList.remove('is-playing');
+      }
+  }
+
+  function toggleAudio() {
+      if (isPlaying) {
+          bgmAudio.pause();
+          isPlaying = false;
+          updateUI(false);
+      } else {
+          bgmAudio.play().then(() => {
+              isPlaying = true;
+              updateUI(true);
+          }).catch(e => {
+              console.error("Audio playback failed:", e);
+              isPlaying = false;
+              updateUI(false);
+          });
+      }
+  }
+
+  if (bgmToggle && bgmAudio && visualizerBars) {
+      bgmToggle.addEventListener('click', (e) => {
+          e.stopPropagation(); // Prevent trigger from global listeners
+          toggleAudio();
+      });
+
+      // Autoplay Logic: Attempt to play on first user interaction
+      const startOnInteraction = () => {
+          if (!isPlaying) {
+              bgmAudio.play().then(() => {
+                  isPlaying = true;
+                  updateUI(true);
+                  cleanupListeners();
+              }).catch(() => {
+                  // Keep waiting for interaction if blocked
+              });
+          }
+      };
+
+      const cleanupListeners = () => {
+          window.removeEventListener('click', startOnInteraction);
+          window.removeEventListener('keydown', startOnInteraction);
+          window.removeEventListener('scroll', startOnInteraction);
+          window.removeEventListener('touchstart', startOnInteraction);
+      };
+
+      window.addEventListener('click', startOnInteraction);
+      window.addEventListener('keydown', startOnInteraction);
+      window.addEventListener('scroll', startOnInteraction);
+      window.addEventListener('touchstart', startOnInteraction);
+      startOnInteraction();
+  }
+});
 
 // 5. Visitor Counter Logic (HUD Integration)
 async function initVisitorCounter() {
